@@ -1,0 +1,33 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+rootProject.name = 'facade'
+
+// Applying plugins causes them to not have any IDE support when also applied to any build.gradle files
+// The workaround for now is to use this listener here so that it can stay in settings.gradle
+// See: https://youtrack.jetbrains.com/issue/IDEA-332061/Gradle-Missing-Code-Completion-Suggestions-for-Settings-Plugins-in-Groovy-DSL
+gradle.beforeProject { Project project ->
+    project.pluginManager.withPlugin('net.minecraftforge.gradleutils') {
+        project.repositories {
+            mavenCentral()
+            maven project.gradleutils.forgeMaven
+            //mavenLocal()
+        }
+    }
+}
+
+//formatter:off
+dependencyResolutionManagement.versionCatalogs {
+    register('libs') {
+        plugin 'licenser',    'net.minecraftforge.licenser'    version '1.2.0'
+        plugin 'gradleutils', 'net.minecraftforge.gradleutils' version '3.3.21'
+        plugin 'gitversion',  'net.minecraftforge.gitversion'  version '3.1.6'
+        plugin 'changelog',   'net.minecraftforge.changelog'   version '3.1.3'
+        plugin 'shadow',      'com.gradleup.shadow'            version '9.2.2'
+
+        library 'nulls', 'org.jspecify',       'jspecify'    version '1.0.0'
+        library 'jopt',  'net.sf.jopt-simple', 'jopt-simple' version '6.0-alpha-3'
+    }
+}
+//formatter:on

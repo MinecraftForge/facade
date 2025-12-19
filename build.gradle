@@ -1,0 +1,90 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.transformers.PropertiesFileTransformer
+
+plugins {
+    id 'java'
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    alias libs.plugins.gradleutils
+    alias libs.plugins.gitversion
+    alias libs.plugins.changelog
+    alias libs.plugins.licenser
+    alias libs.plugins.shadow
+}
+
+gradleutils.displayName = 'Facade'
+description = 'A tool to inject interfaces into jar files allowing compilation against the modified class.'
+group = 'net.minecraftforge'
+version = gitversion.tagOffset
+
+println "Version: $version"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+dependencies {
+    compileOnly libs.nulls
+
+    implementation libs.jopt
+}
+
+license {
+    header = rootProject.file('LICENSE-header.txt')
+    newLine false
+}
+
+tasks.named('jar', Jar) {
+    manifest {
+        attributes([
+            'Main-Class'           : 'net.minecraftforge.facade.Main',
+            'Automatic-Module-Name': 'net.minecraftforge.facade'
+        ])
+
+        gradleutils.manifestDefaults(it, 'net/minecraftforge/facade/')
+    }
+
+    archiveClassifier = 'slim'
+}
+
+tasks.named('shadowJar', ShadowJar) {
+    archiveClassifier = ''
+    minimize()
+    relocate('joptsimple', 'net.minecraftforge.facade.shadow.joptsimple')
+    // Rewrite JOpt's message files, so that help text is displayed nicely.
+    transform(PropertiesFileTransformer) {
+        paths = [ 'Messages.properties$' ]
+        keyTransformer = { key -> 'net.minecraftforge.facade.shadow.' + key }
+    }
+}
+
+changelog {
+    fromBase()
+}
+
+publishing {
+    repositories {
+        maven gradleutils.publishingForgeMaven
+    }
+
+    publications.register('mavenJava', MavenPublication) {
+        from components.shadow
+
+        changelog.publish(it)
+        gradleutils.promote(it)
+
+        pom { pom ->
+            name = gradleutils.displayName
+            description = project.description
+
+            gradleutils.pom.addRemoteDetails(pom)
+
+            licenses {
+                license gradleutils.pom.licenses.LGPLv2_1
+            }
+
+            developers {
+                developer gradleutils.pom.developers.LexManos
+            }
+        }
+    }
+}

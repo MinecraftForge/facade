@@ -1,0 +1,20 @@
+/**/.gradle/
+/**/.classpath
+/**/.project
+/**/.settings/
+/**/bin/
+/**/test/
+/**/build/
+/repo/
+/cache/
+/_old_mdks_/
+
+# Tool Output - Jonathan uses the run directory
+/run/
+/output/
+
+# Jonathan's IntelliJ Fuckery
+/.idea/
+/output.jar
+/output.jar.cache
+/parchment.tsrg

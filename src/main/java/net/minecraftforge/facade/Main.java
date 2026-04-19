@@ -111,7 +111,7 @@ public class Main {
     private static void write(ZipOutputStream out, Set<String> seen, boolean store, ZipEntry entry, byte[] data) throws IOException {
         var idx = entry.getName().lastIndexOf('/');
         if (idx != -1)
-            write(out, seen, entry.getTime(), entry.getName().substring(0, idx));
+            writeDirectory(out, seen, entry.getTime(), entry.getName().substring(0, idx));
 
         var next = new ZipEntry(entry.getName());
         next.setTime(entry.getTime());
@@ -127,16 +127,16 @@ public class Main {
         out.closeEntry();
     }
 
-    private static void write(ZipOutputStream out, Set<String> seen, long time, String directory) throws IOException {
+    private static void writeDirectory(ZipOutputStream out, Set<String> seen, long time, String directory) throws IOException {
         if (seen.contains(directory))
             return;
 
         var idx = directory.lastIndexOf('/');
         if (idx != -1)
-            write(out, seen, time, directory.substring(0, idx));
+            writeDirectory(out, seen, time, directory.substring(0, idx));
         seen.add(directory);
 
-        var next = new ZipEntry(directory);
+        var next = new ZipEntry(directory + '/');
         next.setTime(time);
         out.putNextEntry(next);
         out.closeEntry();

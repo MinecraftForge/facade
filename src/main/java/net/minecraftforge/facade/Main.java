@@ -132,7 +132,7 @@ public class Main {
             return;
 
         var idx = directory.lastIndexOf('/');
-        if (idx == -1)
+        if (idx != -1)
             write(out, seen, time, directory.substring(0, idx));
         seen.add(directory);
 
